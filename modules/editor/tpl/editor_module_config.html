@@ -95,6 +95,14 @@
 					<label class="x_inline"><input type="radio" name="allow_html" value="N" checked="checked"|cond="$editor_config->allow_html == 'N'" /> {$lang->cmd_no}</label>
 				</td>
 			</tr>
+			<tr class="editor_skin">
+				<th scope="row" style="text-align:right">{$lang->guide_choose_autoinsert_image}</th>
+				<td colspan="2">
+					<label class="x_inline"><input type="radio" name="autoinsert_image" value="paragraph" checked="checked"|cond="$editor_config->autoinsert_image == 'paragraph' || !$editor_config->autoinsert_image" /> {$lang->autoinsert_image_paragraph}</label>
+					<label class="x_inline"><input type="radio" name="autoinsert_image" id="autoinsert_image_inline" value="inline" checked="checked"|cond="$editor_config->autoinsert_image == 'inline'" /> {$lang->autoinsert_image_inline}</label>
+					<label class="x_inline"><input type="radio" name="autoinsert_image" id="autoinsert_image_none" value="none" checked="checked"|cond="$editor_config->autoinsert_image == 'none'" /> {$lang->autoinsert_image_none}</label>
+				</td>
+				</tr>
 			<tr>
 				<th scope="row" style="text-align:right">{$lang->enable_html_grant}</th>
 				<td>
