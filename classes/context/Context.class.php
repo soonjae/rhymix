@@ -1434,7 +1434,7 @@ class Context
 				{
 					$_val = (int)$_val;
 				}
-				elseif(in_array($key, array('mid', 'vid', 'search_target', 'search_keyword', 'xe_validator_id')) || count($_GET))
+				elseif(in_array($key, array('mid', 'vid', 'search_target', 'search_keyword', 'xe_validator_id')) || $_SERVER['REQUEST_METHOD'] === 'GET')
 				{
 					$_val = escape($_val, false);
 					if(ends_with('url', $key, false))
@@ -1852,6 +1852,12 @@ class Context
 	 */
 	public static function set($key, $val, $set_to_get_vars = false)
 	{
+		if(empty($key))
+		{
+			trigger_error('Called Context::set() with an empty key', \E_USER_WARNING);
+			return;
+		}
+		
 		self::$_tpl_vars->{$key} = $val;
 
 		if($set_to_get_vars || isset(self::$_get_vars->{$key}))
@@ -1875,6 +1881,12 @@ class Context
 	 */
 	public static function get($key)
 	{
+		if(empty($key))
+		{
+			trigger_error('Called Context::get() with an empty key', \E_USER_WARNING);
+			return;
+		}
+		
 		if(isset(self::$_tpl_vars->{$key}))
 		{
 			return self::$_tpl_vars->{$key};

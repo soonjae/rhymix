@@ -71,7 +71,7 @@
 		if (token) {
 			return $(this).each(function() {
 				if ($(this).data("csrf-token-checked") === "Y") return;
-				if (!isSameOrigin(location.href, $(this).attr("action"))) {
+				if ($(this).attr("action") && !isSameOrigin(location.href, $(this).attr("action"))) {
 					return $(this).data("csrf-token-checked", "Y");
 				}
 				$("<input />").attr({ type: "hidden", name: "_rx_csrf_token", value: token }).appendTo($(this));
@@ -225,16 +225,20 @@
 				window.XE.baseurl = window.XE.baseurl.hostname() + window.XE.baseurl.directory();
 			}
 			
-			var target_url = window.XE.URI(url).normalizePort().normalizeHostname().normalizePathname();
-			if (target_url.is("urn")) {
+			try {
+				var target_url = window.XE.URI(url).normalizePort().normalizeHostname().normalizePathname();
+				if (target_url.is("urn")) {
+					return false;
+				}
+				if (!target_url.hostname()) {
+					target_url = target_url.absoluteTo(window.request_uri);
+				}
+				target_url = target_url.hostname() + target_url.directory();
+				return target_url.indexOf(window.XE.baseurl) === 0;
+			}
+			catch(err) {
 				return false;
 			}
-			if (!target_url.hostname()) {
-				target_url = target_url.absoluteTo(window.request_uri);
-			}
-			target_url = target_url.hostname() + target_url.directory();
-
-			return target_url.indexOf(window.XE.baseurl) === 0;
 		}
 	};
 	

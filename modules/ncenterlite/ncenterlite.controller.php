@@ -352,9 +352,9 @@ class ncenterliteController extends ncenterlite
 		$args = new stdClass();
 		$args->config_type = 'message';
 		$args->member_srl = $obj->receiver_srl;
-		$args->srl = $obj->related_srl;
+		$args->srl = $obj->message_srl;
 		$args->target_p_srl = '1';
-		$args->target_srl = $obj->message_srl;
+		$args->target_srl = $obj->related_srl;
 		$args->target_member_srl = $obj->sender_srl;
 		$args->type = $this->_TYPE_MESSAGE;
 		$args->target_type = $this->_TYPE_MESSAGE;
@@ -748,8 +748,8 @@ class ncenterliteController extends ncenterlite
 			return;
 		}
 
-		// HTML 모드가 아니면 중지 + act에 admin이 포함되어 있으면 중지
-		if(Context::getResponseMethod() != 'HTML' || strpos(strtolower(Context::get('act')), 'admin') !== false)
+		// HTML 모드가 아니면 중지 + admin 모듈이면 중지
+		if(Context::getResponseMethod() != 'HTML' || Context::get('module') == 'admin')
 		{
 			return;
 		}
@@ -761,12 +761,6 @@ class ncenterliteController extends ncenterlite
 		}
 
 		$module_info = Context::get('module_info');
-
-		// admin 모듈이면 중지
-		if($module_info->module == 'admin')
-		{
-			return;
-		}
 
 		$oNcenterliteModel = getModel('ncenterlite');
 		$config = $oNcenterliteModel->getConfig();
@@ -1109,6 +1103,12 @@ class ncenterliteController extends ncenterlite
 			$args->target_email_address = '';
 		}
 
+		$trigger_output = ModuleHandler::triggerCall('ncenterlite._insertNotify', 'before', $args);
+		if(!$trigger_output->toBool() || $trigger_output->getMessage() === 'cancel')
+		{
+			return $trigger_output;
+		}
+		
 		$output = executeQuery('ncenterlite.insertNotify', $args);
 		if($output->toBool())
 		{
