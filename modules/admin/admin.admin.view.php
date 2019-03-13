@@ -51,8 +51,6 @@ class adminAdminView extends admin
 		// Check system configuration
 		$this->checkSystemConfiguration();
 		
-		// Retrieve the list of installed modules
-		$this->checkEasyinstall();
 	}
 
 	/**
@@ -92,52 +90,6 @@ class adminAdminView extends admin
 		}
 	}
 	
-	/**
-	 * check easy install
-	 * @return void
-	 */
-	function checkEasyinstall()
-	{
-		$lastTime = (int) FileHandler::readFile($this->easyinstallCheckFile);
-		if($lastTime > $_SERVER['REQUEST_TIME'] - 60 * 60 * 24 * 30)
-		{
-			return;
-		}
-
-		$oAutoinstallModel = getModel('autoinstall');
-		$params = array();
-		$params["act"] = "getResourceapiLastupdate";
-		$body = XmlGenerater::generate($params);
-		$buff = FileHandler::getRemoteResource(_XE_DOWNLOAD_SERVER_, $body, 3, "POST", "application/xml");
-		$xml_lUpdate = new XmlParser();
-		$lUpdateDoc = $xml_lUpdate->parse($buff);
-		$updateDate = $lUpdateDoc->response->updatedate->body;
-
-		if(!$updateDate)
-		{
-			$this->_markingCheckEasyinstall();
-			return;
-		}
-
-		$item = $oAutoinstallModel->getLatestPackage();
-		if(!$item || $item->updatedate < $updateDate)
-		{
-			$oController = getAdminController('autoinstall');
-			$oController->_updateinfo();
-		}
-		$this->_markingCheckEasyinstall();
-	}
-
-	/**
-	 * update easy install file content
-	 * @return void
-	 */
-	function _markingCheckEasyinstall()
-	{
-		$currentTime = $_SERVER['REQUEST_TIME'];
-		FileHandler::writeFile($this->easyinstallCheckFile, $currentTime);
-	}
-
 	/**
 	 * Include admin menu php file and make menu url
 	 * Setting admin logo, newest news setting
@@ -304,29 +256,6 @@ class adminAdminView extends admin
 		Context::set('latestCommentList', $output);
 		unset($args, $output, $columnList);
 
-		// Get list of modules
-		$oModuleModel = getModel('module');
-		$module_list = $oModuleModel->getModuleList();
-		if(is_array($module_list))
-		{
-			$needUpdate = FALSE;
-			$addTables = FALSE;
-			foreach($module_list AS $key => $value)
-			{
-				if($value->need_install)
-				{
-					$addTables = TRUE;
-				}
-				if($value->need_update)
-				{
-					$needUpdate = TRUE;
-				}
-			}
-		}
-
-		// Get need update from easy install
-		$oAutoinstallAdminModel = getAdminModel('autoinstall');
-		$needUpdateList = $oAutoinstallAdminModel->getNeedUpdateList();
 		$site_module_info = Context::get('site_module_info');
 		$oAddonAdminModel = getAdminModel('addon');
 		$counterAddonActivated = $oAddonAdminModel->isActivatedAddon('counter', $site_module_info->site_srl );
@@ -341,10 +270,6 @@ class adminAdminView extends admin
 			unset($args, $output, $columnList);
 		}
 
-		Context::set('module_list', $module_list);
-		Context::set('needUpdate', $isUpdated);
-		Context::set('addTables', $addTables);
-		Context::set('needUpdate', $needUpdate);
 		Context::set('newVersionList', $needUpdateList);
 		Context::set('counterAddonActivated', $counterAddonActivated);
 
