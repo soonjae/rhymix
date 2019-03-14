@@ -500,6 +500,63 @@ class FileHandler
 			$resize_height = $resize_width;
 		}
 
+		if (extension_loaded('imagick'))
+		{
+			// retrieve source image's information
+			$imageInfo = getimagesize($source_file);
+
+			list($width, $height, $type, $attrs) = $imageInfo;
+			if($width < 1 || $height < 1)
+			{
+				return;
+			}
+
+			// if original image is larger than specified size to resize, calculate the ratio
+			$width_per = ($resize_width > 0 && $width >= $resize_width) ? $resize_width / $width : 1;
+			$height_per = ($resize_height > 0 && $height >= $resize_height) ? $resize_height / $height : 1;
+
+			$per = NULL;
+			if($thumbnail_type == 'ratio')
+			{
+				$per = ($width_per > $height_per) ? $height_per : $width_per;
+				$resize_width = $width * $per;
+				$resize_height = $height * $per;
+				// resize original image and put it into temporary image
+				$new_width = (int) ($width * $per);
+				$new_height = (int) ($height * $per);
+			}
+			else
+			{
+				$new_width =  $resize_width;
+				$new_height =  $resize_width;
+			}
+
+			return self::_createImagickFile($source_file, $target_file, $new_width, $new_height);
+		}
+		else return self::_createGDImageFile($source_file, $target_file, $resize_width, $resize_height, $target_type = '', $thumbnail_type);
+	}
+
+	private static function _createImagickFile($source_file, $target_file, $resize_width = 0, $resize_height = 0)
+	{
+		$image = new \Imagick($source_file);
+		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 256);
+		$image->setResourceLimit(imagick::RESOURCETYPE_MAP, 256);
+		$image->setResourceLimit(imagick::RESOURCETYPE_AREA, 1512);
+		$image->setResourceLimit(imagick::RESOURCETYPE_FILE, 768);
+		$image->setResourceLimit(imagick::RESOURCETYPE_DISK, -1);
+		$image->setImageColorSpace(Imagick::COLORSPACE_SRGB);
+		$image->cropThumbnailImage($resize_width, $resize_height);
+
+		// create directory
+		self::makeDir(dirname($target_file));
+		@chmod($target_file, 0644);
+
+		return $image->writeImage($target_file);
+
+	}
+
+	private static function _createGDImageFile($source_file, $target_file, $resize_width = 0, $resize_height = 0, $target_type = '', $thumbnail_type = 'crop')
+	{
 		// retrieve source image's information
 		$imageInfo = getimagesize($source_file);
 		if(!self::checkMemoryLoadImage($imageInfo))
