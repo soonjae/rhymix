@@ -528,7 +528,7 @@ class FileHandler
 			else
 			{
 				$new_width =  $resize_width;
-				$new_height =  $resize_width;
+				$new_height =  $resize_height;
 			}
 
 			return self::_createImagickFile($source_file, $target_file, $new_width, $new_height);
