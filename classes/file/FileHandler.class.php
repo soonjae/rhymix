@@ -539,11 +539,8 @@ class FileHandler
 	private static function _createImagickFile($source_file, $target_file, $resize_width = 0, $resize_height = 0)
 	{
 		$image = new \Imagick($source_file);
-		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 256);
-		$image->setResourceLimit(imagick::RESOURCETYPE_MAP, 256);
-		$image->setResourceLimit(imagick::RESOURCETYPE_AREA, 1512);
-		$image->setResourceLimit(imagick::RESOURCETYPE_FILE, 768);
-		$image->setResourceLimit(imagick::RESOURCETYPE_DISK, -1);
+		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 6063992832);
+        $image->setResourceLimit(imagick::RESOURCETYPE_MAP, 6063992832);
 		$image->setImageColorSpace(Imagick::COLORSPACE_SRGB);
 		$image->cropThumbnailImage($resize_width, $resize_height);
 
