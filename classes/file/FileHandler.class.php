@@ -540,8 +540,8 @@ class FileHandler
 	{
 		$image = new \Imagick($source_file);
 		//set memory limit 
-		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 6063992832);
-        $image->setResourceLimit(imagick::RESOURCETYPE_MAP, 6063992832);
+		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 126*1024*1024);
+        $image->setResourceLimit(imagick::RESOURCETYPE_MAP, 126*1024*1024);
 		$image->setImageColorSpace(Imagick::COLORSPACE_SRGB);
 		
 		$image->cropThumbnailImage($resize_width, $resize_height);
