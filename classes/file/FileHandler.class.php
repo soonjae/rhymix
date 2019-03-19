@@ -539,17 +539,20 @@ class FileHandler
 	private static function _createImagickFile($source_file, $target_file, $resize_width = 0, $resize_height = 0)
 	{
 		$image = new \Imagick($source_file);
+		//set memory limit 
 		$image->setResourceLimit(imagick::RESOURCETYPE_MEMORY, 6063992832);
         $image->setResourceLimit(imagick::RESOURCETYPE_MAP, 6063992832);
 		$image->setImageColorSpace(Imagick::COLORSPACE_SRGB);
+		
 		$image->cropThumbnailImage($resize_width, $resize_height);
 
 		// create directory
 		self::makeDir(dirname($target_file));
+		$image->writeImage($target_file);
 		@chmod($target_file, 0644);
+		$image->clear();
 
-		return $image->writeImage($target_file);
-
+		return TRUE;
 	}
 
 	private static function _createGDImageFile($source_file, $target_file, $resize_width = 0, $resize_height = 0, $target_type = '', $thumbnail_type = 'crop')
